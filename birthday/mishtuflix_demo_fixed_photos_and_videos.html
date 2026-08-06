@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mishtuflix ❤️</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --nf-red: #E50914;
+    --nf-black: #141414;
+    --nf-gray: #808080;
+  }
+
+  body {
+    background: var(--nf-black);
+    color: #fff;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---------- FLOATING HEARTS BACKGROUND ---------- */
+  .heart-float {
+    position: fixed;
+    bottom: -40px;
+    font-size: 1.4rem;
+    opacity: .35;
+    animation: floatUp linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes floatUp {
+    to { transform: translateY(-115vh) rotate(20deg); opacity: 0; }
+  }
+
+  /* ---------- PROFILE SELECT SCREEN ---------- */
+  #profileScreen {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    animation: fadeIn .6s ease;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .logo {
+    color: var(--nf-red);
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 12px rgba(229, 9, 20, .45);
+  }
+
+  #profileScreen h1 { font-weight: 400; font-size: clamp(1.3rem, 4vw, 2.1rem); }
+  #profileScreen .sub { color: var(--nf-gray); font-size: 1rem; margin-top: -22px; }
+
+  .profiles { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+
+  .profile {
+    background: none; border: none; cursor: pointer;
+    color: var(--nf-gray);
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    transition: color .2s;
+  }
+
+  .profile .avatar {
+    width: clamp(110px, 22vw, 160px);
+    height: clamp(110px, 22vw, 160px);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(2.6rem, 6vw, 4rem);
+    transition: border-color .2s, transform .2s;
+  }
+
+  .profile:hover, .profile:focus-visible { color: #fff; outline: none; }
+  .profile:hover .avatar, .profile:focus-visible .avatar {
+    border-color: #fff; transform: scale(1.05);
+  }
+
+  .avatar.a1 { background: linear-gradient(135deg, #E50914, #ff6b81); }
+  .avatar.a2 { background: linear-gradient(135deg, #ff2e63, #ff9a8b); }
+
+  .profile span { font-size: 1.05rem; letter-spacing: .5px; }
+
+  /* ---------- BROWSE SCREEN ---------- */
+  #browseScreen { display: none; position: relative; z-index: 2; animation: fadeIn .6s ease; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 4vw;
+    background: linear-gradient(to bottom, rgba(0,0,0,.85), rgba(20,20,20,.6));
+    backdrop-filter: blur(6px);
+  }
+  header .logo { font-size: 1.5rem; }
+
+  .back-btn {
+    background: transparent; border: 1px solid var(--nf-gray); color: #fff;
+    padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: .9rem;
+    transition: background .2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,.15); }
+
+  .hero {
+    padding: 10vh 4vw 6vh;
+    background:
+      linear-gradient(to top, var(--nf-black) 5%, transparent 60%),
+      linear-gradient(120deg, rgba(229,9,20,.4), rgba(255,46,99,.25), rgba(20,20,20,.9));
+  }
+
+  .hero .tag {
+    color: #ff6b81; font-weight: 700; letter-spacing: 3px;
+    font-size: .8rem; text-transform: uppercase;
+  }
+  .hero h2 { font-size: clamp(2rem, 6vw, 3.4rem); margin: 10px 0 14px; }
+  .hero p { max-width: 560px; color: #ffd7dd; line-height: 1.5; }
+
+  .row { padding: 24px 4vw 8px; }
+  .row h3 { font-size: 1.2rem; margin-bottom: 14px; font-weight: 600; }
+
+  .cards {
+    display: flex; gap: 14px; overflow-x: auto; padding-bottom: 18px;
+    scrollbar-width: thin; scrollbar-color: #333 transparent;
+    align-items: flex-start;
+  }
+
+  .card-wrap {
+    flex: 0 0 auto;
+    width: clamp(180px, 42vw, 260px);
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+    border-radius: 6px;
+    background: #2a2a2a;
+    background-size: cover; background-position: center;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: #888;
+    cursor: pointer;
+    transition: transform .25s;
+    overflow: hidden;
+  }
+  .card video { width: 100%; height: 100%; object-fit: cover; }
+  .card:hover { transform: scale(1.05); z-index: 2; }
+  .card:hover::after {
+    content: "❤️";
+    position: absolute; top: 6px; right: 8px; font-size: 1rem;
+    animation: pop .3s ease;
+  }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .caption {
+    margin-top: 8px;
+    font-size: .82rem;
+    line-height: 1.45;
+    color: #d8d8d8;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .heart-float { display: none; }
+  }
+
+.image-modal{
+display:none;position:fixed;inset:0;z-index:9999;
+background:rgba(0,0,0,.95);
+justify-content:center;align-items:center;
+}
+.image-modal img{max-width:95%;max-height:95%;object-fit:contain;}
+.image-modal .close{position:absolute;top:20px;right:30px;font-size:40px;color:#fff;cursor:pointer;}
+
+</style>
+</head>
+<body>
+
+<!-- Background Music Player -->
+<audio id="bgMusic" loop volume="0.35"></audio>
+
+<!-- ================= PROFILE SELECT ================= -->
+<section id="profileScreen">
+  <div class="logo">MISHTUFLIX 💗</div>
+  <h1>Who's watching, birthday girl? 🎂</h1>
+  <p class="sub">Made with ❤️ just for you, Mishtu</p>
+  <div class="profiles">
+    <button class="profile" onclick="openProfile('p2425')">
+      <div class="avatar a1">💞</div>
+      <span>2024–25</span>
+    </button>
+    <button class="profile" onclick="openProfile('p2026')">
+      <div class="avatar a2">💖</div>
+      <span>2026</span>
+    </button>
+  </div>
+</section>
+
+<!-- ================= BROWSE SCREEN ================= -->
+<section id="browseScreen">
+  <header>
+    <div class="logo">MISHTUFLIX 💗</div>
+    <button class="back-btn" onclick="goHome()">Switch profile</button>
+  </header>
+
+  <div class="hero">
+    <div class="tag">💌 A Mishtuflix Original</div>
+    <h2 id="heroTitle">Our Story</h2>
+    <p id="heroText"></p>
+  </div>
+
+  <div id="rows"></div>
+</section>
+
+<script>
+  /* ============================================================
+     👇 ADD YOUR PHOTOS / VIDEOS HERE 👇
+     For each item, put the file path in "src"
+     (e.g. src: "photos/prologue1.jpg").
+     For videos, also add  video: true
+     Items with empty src show a placeholder until you fill them.
+     ============================================================ */
+  const seasons = {
+    p2425: {
+      title: "Season 1 · 2024–25 💘",
+      text: "Where it all began. Every episode stars us. ❤️",
+      headings: [
+        {
+          name: "Prologue 🫶🫶",
+          items: [
+            { src: "photos/prologue1.jpg", caption: "The first time we met, at Aarya's home — the best day, a blessing in disguise ❤️" },
+            { src: "photos/prologue2.mp4", video: true, caption: "Cuteness overloaded, nonnu mera 😘" }
+          ]
+        },
+        {
+          name: "Crossing Paths Again 💘",
+          items: [
+            { src: "photos/crossing1.jpg", caption: "I was dying to talk to you again after everything that happened, and finally... heheh 😘🥰" }
+          ]
+        },
+        {
+          name: "Bonding During Internship",
+          items: [
+            { src: "photos/internship1.jpg", caption: "Waiting for moments so we could meet again at Boho Bazaar, just to catch glimpses of you — the day you officially declared my cost as 50 rupees 😝 Tere liye toh free mein bhi aa jaunga yaar 😘" }
+          ]
+        },
+        {
+          name: "Jaipur",
+          items: [
+            { src: "photos/jaipur1.jpg", caption: "Can't forget Jaipur — our first trip together, and where I got hooked onto you even more than before" },
+            { src: "photos/jaipur2.mp4", video: true, caption: "I'm still ashamed about that one thing, but apart from that, I enjoyed the trip to the fullest with you — got obsessed with you" },
+            { src: "photos/jaipur3.mp4", video: true, caption: "" }
+          ]
+        },
+        {
+          name: "Horn Ok",
+          items: [
+            { src: "photos/hornok1.mp4", video: true, caption: "Officially attending a fest together ❤️" },
+            { src: "photos/hornok2.jpg", caption: "Couldn't take my eyes off you — you were looking so hot" }
+          ]
+        },
+        {
+          name: "Our Gedis",
+          items: [
+            { src: "photos/gedi1.jpg", caption: "Going on our first gedi to Murthal — didn't know it would become a weekly thing, but I'm always looking forward to them when college reopens" },
+            { src: "photos/gedi2.jpg", caption: "Sleeping like a cute baby during the ride" }
+          ]
+        },
+        {
+          name: "Your Birthday",
+          items: [
+            { src: "photos/yourbirthday1.jpg", caption: "Happy birthday to youuu, my fav girl — couldn't have been more excited" },
+            { src: "photos/yourbirthday2.jpg", caption: "You were looking so gorgeous. So GORGEOUS, and also SO HOTT 😻😻" }
+          ]
+        },
+        {
+          name: "My Birthday",
+          items: [
+            { src: "photos/mybirthday1.jpg", caption: "Got so happy — I'd never seen such celebrations on my birthday, not since childhood" },
+            { src: "photos/mybirthday2.jpg", caption: "A very memorable day 😝😭" }
+          ]
+        },
+        {
+          name: "Diwali Party",
+          items: [
+            { src: "photos/diwali1.jpg", caption: "So grateful for you because of that photo — otherwise I would have died of guilt. Still sorry for all the drama 😘" },
+            { src: "photos/diwali2.mp4", video: true, caption: "Just look at you — SO PRETTY AND HOTTT 🔥😍" }
+          ]
+        },
+        {
+          name: "Shaadi Mubarak",
+          items: [
+            { src: "photos/shaadi1.jpg", caption: "During the whole shaadi season you were slaying so hard — I mean, you had my attention 24/7 with your dresses. Looking so hot 🔥" },
+            { src: "photos/shaadi2.jpg", caption: "That cocktail outfit was legit liquid fire — no words to describe it 🔥" },
+            { src: "photos/shaadi3.jpg", caption: "Haldi aa gayi oyeee — trying to lift my mood even when the event was so important for you. It clearly shows your personality, Mishtu. So grateful I am 🙏" },
+            { src: "photos/shaadi4.jpg", caption: "Mehendiii oyeee — slay pe slay kare ja rahi thi, heroine 😘" },
+            { src: "photos/shaadi5.jpg", caption: "SO FAB, GORGEOUS, PRETTY — JUST OUT OF WORDSSS" }
+          ]
+        },
+        {
+          name: "Gur Bday & TBSM",
+          items: [
+            { src: "photos/gurbbirthday1.jpg", caption: "Itni hot ki main toh pighal hi gaya 🫠" },
+            { src: "photos/gurbbirthday2.jpg", caption: "Itni hot ki main toh pighal hi gaya 🫠" }
+          ]
+        }
+      ]
+    },
+    p2026: {
+      title: "Season 2 · 2026 ✨💖",
+      text: "The story continues — and the best episodes are still ahead. 💕",
+      headings: [
+        {
+          name: "Coming Soon 💗",
+          items: [
+            { src: "", caption: "" }
+          ]
+        }
+      ]
+    }
+  };
+
+  /* Profile music mapping */
+  const profileMusic = {
+    p2425: "photos/song-2024-25.mp3",
+    p2026: "photos/song-2026.mp3"
+  };
+
+  function openProfile(id) {
+    const s = seasons[id];
+    document.getElementById("heroTitle").textContent = s.title;
+    document.getElementById("heroText").textContent = s.text;
+
+    /* Play profile-specific music */
+    const bgMusic = document.getElementById("bgMusic");
+    if (profileMusic[id]) {
+      bgMusic.src = profileMusic[id];
+      bgMusic.play();
+    }
+
+    const rows = document.getElementById("rows");
+    rows.innerHTML = "";
+    s.headings.forEach(section => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const h = document.createElement("h3");
+      h.textContent = "💗 " + section.name;
+      row.appendChild(h);
+
+      const cards = document.createElement("div");
+      cards.className = "cards";
+
+      section.items.forEach(item => {
+        const wrap = document.createElement("div");
+        wrap.className = "card-wrap";
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        if (item.src && item.video) {
+          const v = document.createElement("video");
+          v.src = item.src;
+          v.controls = true;
+          v.playsInline = true;
+          v.style.width="100%";
+          v.style.height="100%";
+          v.style.objectFit="cover";
+          v.onclick=(e)=>{
+            e.stopPropagation();
+            if(v.requestFullscreen){v.requestFullscreen();}
+            else if(v.webkitEnterFullscreen){v.webkitEnterFullscreen();}
+            v.play();
+          };
+          card.appendChild(v);
+        } else if (item.src) {
+          const img = document.createElement("img");
+          img.src = item.src;
+          img.style.width = "100%";
+          img.style.height = "100%";
+          img.style.objectFit = "cover";
+          img.style.cursor = "pointer";
+          img.onclick = () => {
+            document.getElementById("modalImage").src = item.src;
+            document.getElementById("imageModal").style.display = "flex";
+          };
+          card.appendChild(img);
+        } else {
+          card.textContent = item.video ? "Add video 🎬💕" : "Add photo 💕";
+        }
+        wrap.appendChild(card);
+
+        if (item.caption) {
+          const cap = document.createElement("p");
+          cap.className = "caption";
+          cap.textContent = item.caption;
+          wrap.appendChild(cap);
+        }
+        cards.appendChild(wrap);
+      });
+
+      row.appendChild(cards);
+      rows.appendChild(row);
+    });
+
+    document.getElementById("profileScreen").style.display = "none";
+    document.getElementById("browseScreen").style.display = "block";
+    window.scrollTo(0, 0);
+  }
+
+  function goHome() {
+    document.getElementById("browseScreen").style.display = "none";
+    document.getElementById("profileScreen").style.display = "flex";
+  }
+
+  /* Floating hearts background */
+  const HEARTS = ["❤️", "💖", "💕", "💗", "💘"];
+  for (let i = 0; i < 14; i++) {
+    const h = document.createElement("div");
+    h.className = "heart-float";
+    h.textContent = HEARTS[i % HEARTS.length];
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.animationDuration = 9 + Math.random() * 10 + "s";
+    h.style.animationDelay = -Math.random() * 12 + "s";
+    h.style.fontSize = 0.9 + Math.random() * 1.2 + "rem";
+    document.body.appendChild(h);
+  }
+
+
+document.addEventListener("DOMContentLoaded",function(){
+  const imageModal=document.getElementById("imageModal");
+  const modalImg=document.getElementById("modalImage");
+  imageModal.addEventListener("click",function(e){
+    if(e.target===imageModal){
+      imageModal.style.display="none";
+      modalImg.src="";
+    }
+  });
+});
+
+</script>
+
+<div id="imageModal" class="image-modal">
+<span class="close" onclick="document.getElementById('imageModal').style.display='none'">&times;</span>
+<img id="modalImage" src="">
+</div>
+
+</body>
+</html>
